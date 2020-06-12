@@ -16,7 +16,7 @@ Helm setup
     Should pass         helm repo update
 
 Run oci mirror
-    Should pass         oci-mirror --debug chartmuseum localhost:\$\{DISTRIBUTION_PORT\}/u/acceptance
+    Should pass         oci-mirror --log-debug chartmuseum localhost:\$\{DISTRIBUTION_PORT\}/u/acceptance
 
 Helm pull new chart
     Should pass         helm chart pull localhost:\$\{DISTRIBUTION_PORT\}/u/acceptance/\$\{CHART_NAME_A\}:0.1.0
