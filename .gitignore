@@ -1,0 +1,9 @@
+.idea/
+vendor/
+bin/
+testdata/
+.venv/
+.robot/
+acceptance_tests/lib/__pycache__
+dist/
+releases/
