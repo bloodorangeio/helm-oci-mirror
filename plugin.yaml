@@ -1,5 +1,5 @@
 name: "oci-mirror"
-version: "0.1.0"
+version: "0.2.0"
 usage: "Please see https://github.com/bloodorangeio/helm-oci-mirror for usage"
 description: "mirror a helm repo in an OCI repository"
 command: "$HELM_PLUGIN_DIR/bin/oci-mirror"
