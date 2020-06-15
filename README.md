@@ -77,3 +77,10 @@ During the mirroring process, charts will be downloaded from the repo and upload
 ```
 helm oci-mirror --interval=10 bitnami localhost:5000/helm/hub/bitnami
 ```
+
+### Failure on error
+By default, the `oci-mirror` plugin will continue until all charts have been processed, regardless of failure. To force the plugin to exit upon a single failure, use the `--fail-fast` flag:
+
+```
+helm oci-mirror --fail-fast bitnami localhost:5000/helm/hub/bitnami
+```
