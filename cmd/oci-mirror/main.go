@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"sort"
 	"syscall"
 	"time"
 
@@ -40,6 +41,12 @@ func main() {
 				Required: false,
 				Value:    0,
 			},
+			&cli.BoolFlag{
+				Name:     "fail-fast",
+				Usage:    "Exit on the first encountered error",
+				Required: false,
+				Value:    false,
+			},
 		},
 		Action: ociMirror,
 	}
@@ -53,6 +60,7 @@ func main() {
 func ociMirror(ctx *cli.Context) error {
 	var err error
 	interval := ctx.Int64("interval")
+	failFast := ctx.Bool("fail-fast")
 
 	if ctx.Args().Len() < 2 {
 		return fmt.Errorf("need 2 arguments")
@@ -95,26 +103,44 @@ func ociMirror(ctx *cli.Context) error {
 		return err
 	}
 
-	for _, entry := range index.Entries {
-		for _, thisChart := range entry {
+	keys := make([]string, len(index.Entries))
+	for k := range index.Entries {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		for _, thisChart := range index.Entries[key] {
 			chartName := thisChart.Name
 			chartVersion := thisChart.Version
 
 			log.Printf("Downloading %s version %s ...\n", chartName, chartVersion)
 			ch, ref, err := util.GrabChart(baseRef, tmpDir, reponame, chartName, chartVersion)
 			if err != nil {
-				return err
+				if failFast {
+					return err
+				}
+
+				log.Printf("[ERROR] %s", err.Error())
 			}
 
 			log.Printf("Pushing %s version %s to %s ...\n", chartName, chartVersion, ref.FullName())
 			err = registryClient.SaveChart(ch, ref)
 			if err != nil {
-				return err
+				if failFast {
+					return err
+				}
+
+				log.Printf("[ERROR] %s", err.Error())
 			}
 
 			err = registryClient.PushChart(ref)
 			if err != nil {
-				return err
+				if failFast {
+					return err
+				}
+
+				log.Printf("[ERROR] %s", err.Error())
 			}
 
 			time.Sleep(time.Duration(interval) * time.Second)
